@@ -9,13 +9,14 @@ import {
   Put,
 } from '@nestjs/common';
 import { PostModel, PostsService } from './posts.service';
+import { PostsModel } from './entities/posts.entity';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  getPosts(): PostModel[] {
+  getPosts() {
     return this.postsService.getAllPosts();
   }
 

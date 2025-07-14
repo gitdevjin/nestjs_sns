@@ -1,4 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PostsModel } from './entities/posts.entity';
+import { Repository } from 'typeorm';
 
 /**
  * author: string;
@@ -52,12 +55,19 @@ let posts: PostModel[] = [
 
 @Injectable()
 export class PostsService {
-  getAllPosts() {
-    return posts;
+  constructor(
+    @InjectRepository(PostsModel)
+    private readonly postsRepository: Repository<PostsModel>,
+  ) {}
+
+  async getAllPosts(): Promise<PostsModel[]> {
+    return this.postsRepository.find(); // await will be handled by nestjs or at above layer
   }
 
-  getPostbyId(id: number): PostModel {
-    const post = posts.find((post) => post.id === id);
+  async getPostbyId(id: number): Promise<PostsModel> {
+    const post = await this.postsRepository.findOne({
+      where: { id },
+    }); // since I need to use the post, I need await
 
     if (!post) {
       throw new NotFoundException();
@@ -66,28 +76,36 @@ export class PostsService {
     return post;
   }
 
-  createPost(author: string, title: string, content: string): PostModel {
-    const post: PostModel = {
-      id: posts[posts.length - 1].id + 1,
+  async createPost(
+    author: string,
+    title: string,
+    content: string,
+  ): Promise<PostsModel> {
+    const post = this.postsRepository.create({
       author,
       title,
       content,
       likeCount: 0,
       commentCount: 0,
-    };
+    });
 
-    posts = [...posts, post];
+    const newPost = await this.postsRepository.save(post);
 
-    return post;
+    return newPost;
   }
 
-  updatePost(
+  async updatePost(
     postId: number,
     author: string,
     title: string,
     content: string,
-  ): PostModel {
-    const post = posts.find((post) => post.id === postId);
+  ): Promise<PostsModel> {
+    const post = await this.postsRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
+
     if (!post) {
       throw new NotFoundException();
     }
@@ -102,18 +120,23 @@ export class PostsService {
       post.content = content;
     }
 
-    posts = posts.map((prevPost) => (prevPost.id === postId ? post : prevPost));
+    const newPost = await this.postsRepository.save(post);
 
-    return post;
+    return newPost;
   }
 
-  deletePost(postId: number) {
-    const post = posts.find((post) => post.id === postId);
+  async deletePost(postId: number) {
+    const post = await this.postsRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
+
     if (!post) {
       throw new NotFoundException();
     }
 
-    posts = posts.filter((post) => post.id !== postId);
+    await this.postsRepository.delete(postId);
 
     return postId;
   }
