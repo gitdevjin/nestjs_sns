@@ -17,41 +17,41 @@ import { Repository } from 'typeorm';
 // 4) PUT /posts/:id
 // 5) DELETE /posts/:id
 
-export interface PostModel {
-  id: number;
-  author: string;
-  title: string;
-  content: string;
-  likeCount: number;
-  commentCount: number;
-}
+// export interface PostModel {
+//   id: number;
+//   author: string;
+//   title: string;
+//   content: string;
+//   likeCount: number;
+//   commentCount: number;
+// }
 
-let posts: PostModel[] = [
-  {
-    id: 1,
-    author: 'first author',
-    title: 'first title',
-    content: 'first content',
-    likeCount: 10,
-    commentCount: 10,
-  },
-  {
-    id: 2,
-    author: 'second author',
-    title: 'second title',
-    content: 'second content',
-    likeCount: 10,
-    commentCount: 30,
-  },
-  {
-    id: 3,
-    author: 'third author',
-    title: 'third title',
-    content: 'third content',
-    likeCount: 20,
-    commentCount: 30,
-  },
-];
+// let posts: PostModel[] = [
+//   {
+//     id: 1,
+//     author: 'first author',
+//     title: 'first title',
+//     content: 'first content',
+//     likeCount: 10,
+//     commentCount: 10,
+//   },
+//   {
+//     id: 2,
+//     author: 'second author',
+//     title: 'second title',
+//     content: 'second content',
+//     likeCount: 10,
+//     commentCount: 30,
+//   },
+//   {
+//     id: 3,
+//     author: 'third author',
+//     title: 'third title',
+//     content: 'third content',
+//     likeCount: 20,
+//     commentCount: 30,
+//   },
+// ];
 
 @Injectable()
 export class PostsService {
@@ -61,7 +61,11 @@ export class PostsService {
   ) {}
 
   async getAllPosts(): Promise<PostsModel[]> {
-    return this.postsRepository.find(); // await will be handled by nestjs or at above layer
+    return this.postsRepository.find({
+      relations: {
+        author: true,
+      },
+    }); // await will be handled by nestjs or at above layer
   }
 
   async getPostbyId(id: number): Promise<PostsModel> {
@@ -77,12 +81,14 @@ export class PostsService {
   }
 
   async createPost(
-    author: string,
+    authorId: number,
     title: string,
     content: string,
   ): Promise<PostsModel> {
     const post = this.postsRepository.create({
-      author,
+      author: {
+        id: authorId,
+      },
       title,
       content,
       likeCount: 0,
@@ -96,7 +102,6 @@ export class PostsService {
 
   async updatePost(
     postId: number,
-    author: string,
     title: string,
     content: string,
   ): Promise<PostsModel> {
@@ -110,9 +115,6 @@ export class PostsService {
       throw new NotFoundException();
     }
 
-    if (author) {
-      post.author = author;
-    }
     if (title) {
       post.title = title;
     }
