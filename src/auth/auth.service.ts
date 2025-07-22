@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersModel } from 'src/users/entities/users.entity';
 import { JWT_SECRET } from './const/auth.const';
+import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
+  ) {}
   /**
    * To do
    *
@@ -23,11 +28,7 @@ export class AuthService {
    * 4) signToken
    *    - generate accessToken and refreshToken
    *
-   * 5) authenticateWithEmailandPassword
-   *    - authentication logic
-   *      1. check if the user(email) exists
-   *      2. check password
-   *      3. return user info
+   *
    *
    *
    */
@@ -56,5 +57,34 @@ export class AuthService {
       accessToken: this.signToken(user, false),
       refreshToken: this.signToken(user, true),
     };
+  }
+
+  /*
+  5) authenticateWithEmailandPassword
+   *    - authentication logic
+   *      1. check if the user(email) exists
+   *      2. check password
+   *      3. return user info
+   * */
+  async authenticateWithEmailAndPassword(
+    user: Pick<UsersModel, 'email' | 'password'>,
+  ) {
+    const existingUser = await this.usersService.getUserByEmail(user.email);
+
+    if (!existingUser) {
+      throw new UnauthorizedException("User doesn't exist");
+    }
+
+    /**
+     * 1. entered password
+     * 2. stored hash
+     */
+    const passOk = await bcrypt.compare(user.password, existingUser.password);
+
+    if (!passOk) {
+      throw new UnauthorizedException('Wrong Password');
+    }
+
+    return existingUser;
   }
 }
