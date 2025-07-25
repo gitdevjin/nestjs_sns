@@ -17,42 +17,6 @@ import { Repository } from 'typeorm';
 // 4) PUT /posts/:id
 // 5) DELETE /posts/:id
 
-// export interface PostModel {
-//   id: number;
-//   author: string;
-//   title: string;
-//   content: string;
-//   likeCount: number;
-//   commentCount: number;
-// }
-
-// let posts: PostModel[] = [
-//   {
-//     id: 1,
-//     author: 'first author',
-//     title: 'first title',
-//     content: 'first content',
-//     likeCount: 10,
-//     commentCount: 10,
-//   },
-//   {
-//     id: 2,
-//     author: 'second author',
-//     title: 'second title',
-//     content: 'second content',
-//     likeCount: 10,
-//     commentCount: 30,
-//   },
-//   {
-//     id: 3,
-//     author: 'third author',
-//     title: 'third title',
-//     content: 'third content',
-//     likeCount: 20,
-//     commentCount: 30,
-//   },
-// ];
-
 @Injectable()
 export class PostsService {
   constructor(
@@ -71,6 +35,9 @@ export class PostsService {
   async getPostbyId(id: number): Promise<PostsModel> {
     const post = await this.postsRepository.findOne({
       where: { id },
+      relations: {
+        author: true,
+      },
     }); // since I need to use the post, I need await
 
     if (!post) {

@@ -1,5 +1,13 @@
+import { BaseModel } from 'src/common/entity/base.entity';
 import { PostsModel } from 'src/posts/entities/posts.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum RolesEnum {
   USER = 'user',
@@ -7,10 +15,7 @@ export enum RolesEnum {
 }
 
 @Entity()
-export class UsersModel {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class UsersModel extends BaseModel {
   @Column({
     length: 20,
     unique: true,
