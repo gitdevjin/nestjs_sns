@@ -8,12 +8,13 @@ import { UsersModel } from 'src/users/entities/users.entity';
 import { HASH_ROUNDS, JWT_SECRET } from './const/auth.const';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { RegisterUserDto } from './dto/register-user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly usersService: UsersService,
+    private readonly usersService: UsersService
   ) {}
 
   /** Login and refresh Token Logic
@@ -50,9 +51,13 @@ export class AuthService {
   }
 
   verifyToken(token: string) {
-    return this.jwtService.verify(token, {
-      secret: JWT_SECRET,
-    });
+    try {
+      return this.jwtService.verify(token, {
+        secret: JWT_SECRET,
+      });
+    } catch (e) {
+      throw new UnauthorizedException('Token expired or Wrong');
+    }
   }
 
   rotateToken(token: string, isRefreshToken: boolean) {
@@ -68,7 +73,7 @@ export class AuthService {
       {
         ...decoded,
       },
-      isRefreshToken,
+      isRefreshToken
     );
   }
 
@@ -125,7 +130,7 @@ export class AuthService {
   }
 
   async authenticateWithEmailAndPassword(
-    user: Pick<UsersModel, 'email' | 'password'>,
+    user: Pick<UsersModel, 'email' | 'password'>
   ) {
     const existingUser = await this.usersService.getUserByEmail(user.email);
 
@@ -151,9 +156,7 @@ export class AuthService {
     return this.loginUser(existingUser);
   }
 
-  async registerWithEmail(
-    user: Pick<UsersModel, 'nickname' | 'email' | 'password'>,
-  ) {
+  async registerWithEmail(user: RegisterUserDto) {
     const hash = await bcrypt.hash(user.password, HASH_ROUNDS);
 
     const newUser = await this.usersService.createUser({
@@ -161,5 +164,20 @@ export class AuthService {
       password: hash,
     });
     return this.loginUser(newUser);
+  }
+
+  decodeBasicToken(base64String: string) {
+    const decoded = Buffer.from(base64String, 'base64').toString('utf8');
+
+    const split = decoded.split(':');
+
+    if (split.length !== 2) {
+      throw new UnauthorizedException('Wrong format Token');
+    }
+
+    const email = split[0];
+    const password = split[1];
+
+    return { email, password };
   }
 }

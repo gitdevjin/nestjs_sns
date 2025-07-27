@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class UsersService {
   constructor(
     @InjectRepository(UsersModel)
-    private readonly usersRepository: Repository<UsersModel>,
+    private readonly usersRepository: Repository<UsersModel>
   ) {}
 
   async createUser(user: Pick<UsersModel, 'nickname' | 'email' | 'password'>) {

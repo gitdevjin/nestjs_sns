@@ -1,4 +1,14 @@
+import { Exclude } from 'class-transformer';
+import {
+  IsEmail,
+  IsString,
+  Length,
+  ValidationArguments,
+} from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
+import { emailValidationMessage } from 'src/common/validation-message/email-validation.message';
+import { LengthValidationMessage } from 'src/common/validation-message/length-validation.message';
+import { stringValidationMessage } from 'src/common/validation-message/string-validation.message';
 import { PostsModel } from 'src/posts/entities/posts.entity';
 import {
   Column,
@@ -16,18 +26,21 @@ export enum RolesEnum {
 
 @Entity()
 export class UsersModel extends BaseModel {
-  @Column({
-    length: 20,
-    unique: true,
-  })
+  @Column({ length: 20, unique: true })
+  @IsString({ message: stringValidationMessage })
+  @Length(2, 20, { message: LengthValidationMessage })
   nickname: string;
 
-  @Column({
-    unique: true,
-  })
+  @Column({ unique: true })
+  @IsEmail({}, { message: emailValidationMessage })
   email: string;
 
   @Column()
+  @IsString({ message: stringValidationMessage })
+  @Length(3, 8, {
+    message: LengthValidationMessage,
+  })
+  @Exclude()
   password: string;
 
   @Column({

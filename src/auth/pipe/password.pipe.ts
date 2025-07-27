@@ -10,7 +10,7 @@ export class PasswordPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
     if (value.toString().length > 8) {
       throw new BadRequestException(
-        'password should be less than 8 characters',
+        'password should be less than 8 characters'
       );
     }
     return value.toString();
