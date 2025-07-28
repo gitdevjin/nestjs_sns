@@ -35,12 +35,19 @@ export class UsersModel extends BaseModel {
   @IsEmail({}, { message: emailValidationMessage })
   email: string;
 
+  /**
+   * Request
+   * frontend -> backend : plain object(JSON) -> class instance(dto)
+   *
+   * Response
+   * backend -> frontend: class instance(Dto) -> plain object(JSON)
+   */
   @Column()
   @IsString({ message: stringValidationMessage })
   @Length(3, 8, {
     message: LengthValidationMessage,
   })
-  @Exclude()
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @Column({
