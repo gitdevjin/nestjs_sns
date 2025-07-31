@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostsModel } from './entities/posts.entity';
 import { FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
@@ -9,6 +9,14 @@ import { URL } from 'url';
 import { CommonService } from 'src/common/common.service';
 import { ConfigService } from '@nestjs/config';
 import { ENV_HOST_KEY, ENV_PROTOCOL_KEY } from 'src/common/const/env-keys.const';
+import {
+  POST_IMAGE_PATH,
+  PUBLIC_FOLDER_PATH,
+  TEMP_FOLDER_NAME,
+  TEMP_FOLDER_PATH,
+} from 'src/common/const/path.const';
+import { basename, join } from 'path';
+import { promises } from 'fs';
 
 /**
  * author: string;
@@ -135,6 +143,7 @@ export class PostsService {
       await this.createPost(userId, {
         title: `random post ${i}`,
         content: `random content ${i}`,
+        images: [],
       });
     }
   }
@@ -154,17 +163,13 @@ export class PostsService {
     return post;
   }
 
-  async createPost(
-    authorId: number,
-    postDto: CreatePostDto,
-    image?: string
-  ): Promise<PostsModel> {
+  async createPost(authorId: number, postDto: CreatePostDto): Promise<PostsModel> {
     const post = this.postsRepository.create({
       author: {
         id: authorId,
       },
       ...postDto,
-      image,
+
       likeCount: 0,
       commentCount: 0,
     });
@@ -172,6 +177,24 @@ export class PostsService {
     const newPost = await this.postsRepository.save(post);
 
     return newPost;
+  }
+
+  async createPostImage(dto: CreatePostDto) {
+    const tempFilePath = join(TEMP_FOLDER_PATH, dto.image);
+    try {
+      // check if the file exists
+      await promises.access(tempFilePath);
+    } catch (e) {
+      throw new BadRequestException("file doesn't exists");
+    }
+
+    const fileName = basename(tempFilePath);
+
+    const newPath = join(POST_IMAGE_PATH, fileName);
+
+    await promises.rename(tempFilePath, newPath);
+
+    return true;
   }
 
   async updatePost(postId: number, postDto: UpdatePostDto): Promise<PostsModel> {
