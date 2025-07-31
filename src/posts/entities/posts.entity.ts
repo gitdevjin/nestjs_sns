@@ -45,5 +45,5 @@ export class PostsModel extends BaseModel {
   author: UsersModel;
 
   @OneToMany(() => ImageModel, (image) => image.post)
-  images: ImageModel;
+  images: ImageModel[];
 }

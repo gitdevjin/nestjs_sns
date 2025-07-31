@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostsModel } from './entities/posts.entity';
-import { FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
+import { FindOptionsWhere, LessThan, MoreThan, QueryRunner, Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/paginate-post.dto';
@@ -17,14 +17,8 @@ import {
 } from 'src/common/const/path.const';
 import { basename, join } from 'path';
 import { promises } from 'fs';
-
-/**
- * author: string;
- * title: string;
- * content;
- * likeCount: number;
- * commentcount: number;
- */
+import { CreatePostImageDto } from './image/dto/create-image.dto';
+import { ImageModel } from 'src/common/entity/image.entity';
 
 // 1) GET /posts
 // 2) GET /posts/:id
@@ -37,6 +31,8 @@ export class PostsService {
   constructor(
     @InjectRepository(PostsModel)
     private readonly postsRepository: Repository<PostsModel>,
+    @InjectRepository(ImageModel)
+    private readonly imageRepository: Repository<ImageModel>,
     private readonly commonService: CommonService,
     private readonly configService: ConfigService
   ) {}
@@ -153,6 +149,7 @@ export class PostsService {
       where: { id },
       relations: {
         author: true,
+        images: true,
       },
     }); // since I need to use the post, I need await
 
@@ -163,38 +160,30 @@ export class PostsService {
     return post;
   }
 
-  async createPost(authorId: number, postDto: CreatePostDto): Promise<PostsModel> {
-    const post = this.postsRepository.create({
+  getRepository(qr?: QueryRunner) {
+    return qr ? qr.manager.getRepository<PostsModel>(PostsModel) : this.postsRepository;
+  }
+
+  async createPost(
+    authorId: number,
+    postDto: CreatePostDto,
+    qr?: QueryRunner
+  ): Promise<PostsModel> {
+    const repository = this.getRepository(qr);
+
+    const post = repository.create({
       author: {
         id: authorId,
       },
-      ...postDto,
-
+      title: postDto.title,
+      content: postDto.content,
       likeCount: 0,
       commentCount: 0,
     });
 
-    const newPost = await this.postsRepository.save(post);
+    const newPost = await repository.save(post);
 
     return newPost;
-  }
-
-  async createPostImage(dto: CreatePostDto) {
-    const tempFilePath = join(TEMP_FOLDER_PATH, dto.image);
-    try {
-      // check if the file exists
-      await promises.access(tempFilePath);
-    } catch (e) {
-      throw new BadRequestException("file doesn't exists");
-    }
-
-    const fileName = basename(tempFilePath);
-
-    const newPath = join(POST_IMAGE_PATH, fileName);
-
-    await promises.rename(tempFilePath, newPath);
-
-    return true;
   }
 
   async updatePost(postId: number, postDto: UpdatePostDto): Promise<PostsModel> {
