@@ -24,7 +24,6 @@ import { UsersModule } from 'src/users/users.module';
          *  frist argument: error info,
          *  second argument: whether to download file
          */
-
         const ext = extname(file.originalname);
         if (ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png') {
           return cb(
