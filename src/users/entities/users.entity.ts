@@ -1,10 +1,7 @@
 import { Exclude } from 'class-transformer';
-import {
-  IsEmail,
-  IsString,
-  Length,
-  ValidationArguments,
-} from 'class-validator';
+import { IsEmail, IsString, Length, ValidationArguments } from 'class-validator';
+import { ChatsModel } from 'src/chats/entity/chats.entity';
+import { MessagesModel } from 'src/chats/messages/entity/messages.entity';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { emailValidationMessage } from 'src/common/validation-message/email-validation.message';
 import { LengthValidationMessage } from 'src/common/validation-message/length-validation.message';
@@ -14,6 +11,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -58,4 +57,11 @@ export class UsersModel extends BaseModel {
 
   @OneToMany(() => PostsModel, (post) => post.author)
   posts: PostsModel[];
+
+  @ManyToMany(() => ChatsModel, (chat) => chat.users)
+  @JoinTable()
+  chats: ChatsModel[];
+
+  @OneToMany(() => MessagesModel, (message) => message.author)
+  messages: MessagesModel[];
 }
