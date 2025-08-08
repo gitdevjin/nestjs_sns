@@ -6,6 +6,7 @@ import { BaseModel } from 'src/common/entity/base.entity';
 import { emailValidationMessage } from 'src/common/validation-message/email-validation.message';
 import { LengthValidationMessage } from 'src/common/validation-message/length-validation.message';
 import { stringValidationMessage } from 'src/common/validation-message/string-validation.message';
+import { CommentsModel } from 'src/posts/comments/entity/comment.entity';
 import { PostsModel } from 'src/posts/entities/posts.entity';
 import {
   Column,
@@ -64,4 +65,7 @@ export class UsersModel extends BaseModel {
 
   @OneToMany(() => MessagesModel, (message) => message.author)
   messages: MessagesModel[];
+
+  @OneToMany(() => CommentsModel, (comment) => comment.author)
+  postComments: CommentsModel[];
 }

@@ -15,6 +15,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CommentsModel } from '../comments/entity/comment.entity';
 
 @Entity()
 export class PostsModel extends BaseModel {
@@ -46,4 +47,7 @@ export class PostsModel extends BaseModel {
 
   @OneToMany(() => ImageModel, (image) => image.post)
   images: ImageModel[];
+
+  @OneToMany(() => CommentsModel, (comment) => comment.post)
+  comments: CommentsModel[];
 }
