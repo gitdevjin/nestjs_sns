@@ -35,6 +35,7 @@ import { TransactionInterceptor } from 'src/common/interceptor/transaction.inter
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { HttpExecptionFilter } from 'src/common/exception-filter/http.exception-filter';
 import { Roles } from 'src/users/decorator/roles.decorator';
+import { IsPublic } from 'src/common/decorator/is-public.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -45,6 +46,7 @@ export class PostsController {
   ) {}
 
   @Get()
+  @IsPublic()
   // @UseInterceptors(LogInterceptor)
   @UseFilters(HttpExecptionFilter)
   getPosts(@Query() query: PaginatePostDto) {
@@ -61,6 +63,7 @@ export class PostsController {
   }
 
   @Get(':id')
+  @IsPublic()
   getPost(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.getPostbyId(id);
   }

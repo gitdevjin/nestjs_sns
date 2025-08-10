@@ -21,6 +21,7 @@ import { SocketBearerTokenGuard } from 'src/auth/guard/socket/socket-bearer-toke
 import { UsersModel } from 'src/users/entities/users.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
+import { IsPublic } from 'src/common/decorator/is-public.decorator';
 
 @WebSocketGateway({
   //ws://localhost:3000/chats

@@ -19,6 +19,7 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/decorator/user.decorator';
 import { UsersModel } from 'src/users/entities/users.entity';
 import { UpdateCommentsDto } from './dto/update-comments.dto';
+import { IsPublic } from 'src/common/decorator/is-public.decorator';
 
 @Controller('posts/:postId/comments')
 export class CommentsController {
@@ -37,6 +38,7 @@ export class CommentsController {
   }
 
   @Get()
+  @IsPublic()
   getComments(
     @Query() query: PaginateCommentsDto,
     @Param('postId', ParseIntPipe) postId: number
@@ -45,6 +47,7 @@ export class CommentsController {
   }
 
   @Get(':commentId')
+  @IsPublic()
   getComment(@Param('commentId', ParseIntPipe) commentId: number) {
     return this.commentsService.getCommentById(commentId);
   }
@@ -60,7 +63,7 @@ export class CommentsController {
   }
 
   @Patch(':commentId')
-  @UseGuards(AccessTokenGuard)
+  //@UseGuards(AccessTokenGuard)
   async patchComment(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() body: UpdateCommentsDto
