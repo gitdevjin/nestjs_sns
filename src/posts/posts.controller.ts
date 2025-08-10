@@ -21,7 +21,7 @@ import {
 import { PostsService } from './posts.service';
 import { PostsModel } from './entities/posts.entity';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
-import { UsersModel } from 'src/users/entities/users.entity';
+import { RolesEnum, UsersModel } from 'src/users/entities/users.entity';
 import { User } from 'src/users/decorator/user.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -34,6 +34,7 @@ import { LogInterceptor } from 'src/common/interceptor/log.interceptor';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { HttpExecptionFilter } from 'src/common/exception-filter/http.exception-filter';
+import { Roles } from 'src/users/decorator/roles.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -95,6 +96,8 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @UseGuards(AccessTokenGuard)
+  @Roles(RolesEnum.ADMIN)
   deletePost(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.deletePost(id);
   }

@@ -15,6 +15,8 @@ import { CommonModule } from 'src/common/common.module';
 import { ImageModel } from 'src/common/entity/image.entity';
 import { PostImagesService } from './image/images.service';
 import { LogMiddleware } from 'src/common/middleware/log.middleware';
+import { PostExistsMiddleware } from './comments/middleware/post-exists.middleware';
+import { CommentsController } from './comments/comments.controller';
 
 @Module({
   imports: [
@@ -26,4 +28,8 @@ import { LogMiddleware } from 'src/common/middleware/log.middleware';
   controllers: [PostsController],
   providers: [PostsService, PostImagesService],
 })
-export class PostsModule {}
+export class PostsModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(PostExistsMiddleware).forRoutes(CommentsController);
+  }
+}
