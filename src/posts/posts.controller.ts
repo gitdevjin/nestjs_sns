@@ -36,6 +36,7 @@ import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { HttpExecptionFilter } from 'src/common/exception-filter/http.exception-filter';
 import { Roles } from 'src/users/decorator/roles.decorator';
 import { IsPublic } from 'src/common/decorator/is-public.decorator';
+import { IsPostMineOrAdmin } from './guard/IsPostMineOrAdmin.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -93,13 +94,14 @@ export class PostsController {
     return this.postsService.getPostbyId(post.id, qr);
   }
 
-  @Patch(':id')
-  patchPost(@Param('id', ParseIntPipe) id: number, @Body() body: UpdatePostDto) {
+  @Patch(':postId')
+  @UseGuards(IsPostMineOrAdmin)
+  patchPost(@Param('postId', ParseIntPipe) id: number, @Body() body: UpdatePostDto) {
     return this.postsService.updatePost(id, body);
   }
 
   @Delete(':id')
-  @UseGuards(AccessTokenGuard)
+  //@UseGuards(AccessTokenGuard)
   @Roles(RolesEnum.ADMIN)
   deletePost(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.deletePost(id);

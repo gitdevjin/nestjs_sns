@@ -18,6 +18,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from '../decorator/user.decorator';
+import { UserFollowersModel } from './user-followers.entity';
 
 export enum RolesEnum {
   USER = 'user',
@@ -68,4 +70,11 @@ export class UsersModel extends BaseModel {
 
   @OneToMany(() => CommentsModel, (comment) => comment.author)
   postComments: CommentsModel[];
+
+  //
+  @OneToMany(() => UserFollowersModel, (ufm) => ufm.follower)
+  followers: UserFollowersModel[];
+
+  @OneToMany(() => UserFollowersModel, (ufm) => ufm.followee)
+  followees: UserFollowersModel[];
 }
